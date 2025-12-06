@@ -2,21 +2,25 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import {
-    Area,
-    AreaChart,
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis, YAxis
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis
 } from 'recharts';
+
+// API URL - uses environment variable in production, localhost in development
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 
 function App() {
   const [stats, setStats] = useState({ totalCustomers: 0, totalOrders: 0, totalRevenue: 0 });
@@ -81,13 +85,13 @@ function App() {
   // 1. Fetch Data from Java Backend
   const fetchData = async () => {
     try {
-      const statsRes = await axios.get('http://localhost:8080/api/dashboard-stats');
+      const statsRes = await axios.get(`${API_BASE_URL}/api/dashboard-stats`);
       setStats(statsRes.data);
 
-      const ordersRes = await axios.get('http://localhost:8080/api/orders');
+      const ordersRes = await axios.get(`${API_BASE_URL}/api/orders`);
       setOrders(ordersRes.data);
 
-      const customersRes = await axios.get('http://localhost:8080/api/customers');
+      const customersRes = await axios.get(`${API_BASE_URL}/api/customers`);
       setCustomers(customersRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -99,9 +103,9 @@ function App() {
     setLoading(true);
     setSyncMessage('');
     try {
-      const response = await axios.post('http://localhost:8080/api/sync');
+      const response = await axios.post(`${API_BASE_URL}/api/sync`);
       const message = response.data || "Sync completed";
-      
+
       // Check if sync was successful
       if (message.includes("Successful") || message.includes("successful")) {
         setDataSource('shopify');
@@ -109,7 +113,7 @@ function App() {
       } else {
         setSyncMessage('⚠️ ' + message);
       }
-      
+
       // Wait a moment then fetch fresh data
       setTimeout(() => {
         fetchData();
@@ -138,9 +142,9 @@ function App() {
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>🛍️ Xeno Store Insights</h1>
-        <button 
-          className="btn btn-primary btn-lg" 
-          onClick={handleSync} 
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={handleSync}
           disabled={loading}
         >
           {loading ? 'Syncing...' : '🔄 Sync Shopify Data'}
